@@ -1,0 +1,32 @@
+ALTER TABLE users
+    ADD CONSTRAINT uc_users_login UNIQUE (login);
+
+ALTER TABLE letters
+    ALTER COLUMN city TYPE VARCHAR(255) USING (city::VARCHAR(255));
+
+ALTER TABLE letters
+    ALTER COLUMN first_name TYPE VARCHAR(255) USING (first_name::VARCHAR(255));
+
+ALTER TABLE letters
+    ALTER COLUMN last_name TYPE VARCHAR(255) USING (last_name::VARCHAR(255));
+
+ALTER TABLE users
+    ALTER COLUMN login TYPE VARCHAR(255) USING (login::VARCHAR(255));
+
+ALTER TABLE elfs
+    ALTER COLUMN name_elf TYPE VARCHAR(255) USING (name_elf::VARCHAR(255));
+
+ALTER TABLE role
+    ALTER COLUMN name_role TYPE VARCHAR(255) USING (name_role::VARCHAR(255));
+
+ALTER TABLE users
+    ALTER COLUMN password TYPE VARCHAR(255) USING (password::VARCHAR(255));
+
+ALTER TABLE letters
+    ALTER COLUMN patronymic TYPE VARCHAR(255) USING (patronymic::VARCHAR(255));
+
+ALTER TABLE letters_status
+    ALTER COLUMN status_letter TYPE VARCHAR(255) USING (status_letter::VARCHAR(255));
+
+ALTER TABLE letters
+    ALTER COLUMN text_letter TYPE VARCHAR(255) USING (text_letter::VARCHAR(255));
