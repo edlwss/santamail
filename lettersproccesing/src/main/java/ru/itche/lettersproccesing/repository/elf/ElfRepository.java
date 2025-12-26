@@ -1,4 +1,7 @@
 package ru.itche.lettersproccesing.repository.elf;
 
-public interface ElfRepository {
+import org.springframework.data.jpa.repository.JpaRepository;
+import ru.itche.lettersproccesing.entity.Elf;
+
+public interface ElfRepository extends JpaRepository<Elf, Long> {
 }

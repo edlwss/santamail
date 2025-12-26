@@ -1,4 +1,4 @@
-package ru.itche.lettersproccesing.controller.auth.payload;
+package ru.itche.lettersproccesing.dto.auth;
 
 public record AuthResponse(
         String token

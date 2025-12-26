@@ -1,4 +1,4 @@
-package ru.itche.lettersproccesing.dto.user;
+package ru.itche.lettersproccesing.dto.elf;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 

@@ -1,4 +1,4 @@
-package ru.itche.lettersproccesing.dto.user;
+package ru.itche.lettersproccesing.dto.elf;
 
 public record CreateElfResponse(
         Long id,
