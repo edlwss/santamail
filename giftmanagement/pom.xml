@@ -8,26 +8,23 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>lettersproccesing</artifactId>
+    <artifactId>giftmanagement</artifactId>
 
     <dependencies>
 
-        <!-- WEB / REST -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
-        <!-- JPA / Hibernate -->
+        <dependency>
+            <groupId>org.springframework.kafka</groupId>
+            <artifactId>spring-kafka</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
-        </dependency>
-
-        <!-- SECURITY -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-security</artifactId>
         </dependency>
 
         <!-- JWT -->
@@ -73,32 +70,10 @@
             <scope>provided</scope>
         </dependency>
 
-        <!-- DEVTOOLS -->
+        <!-- для логирования -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-devtools</artifactId>
-            <scope>runtime</scope>
-            <optional>true</optional>
-        </dependency>
-
-        <!-- TESTS -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
-            <scope>test</scope>
-        </dependency>
-
-        <!-- SWAGGER -->
-        <dependency>
-            <groupId>org.springdoc</groupId>
-            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-            <version>2.5.0</version>
-        </dependency>
-
-        <!-- KAFKA -->
-        <dependency>
-            <groupId>org.springframework.kafka</groupId>
-            <artifactId>spring-kafka</artifactId>
+            <artifactId>spring-boot-starter-logging</artifactId>
         </dependency>
 
     </dependencies>

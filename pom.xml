@@ -25,6 +25,7 @@
 
     <modules>
         <module>lettersproccesing</module>
+        <module>giftmanagement</module>
     </modules>
 
     <properties>

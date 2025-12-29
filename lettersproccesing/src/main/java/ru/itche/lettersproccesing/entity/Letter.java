@@ -4,10 +4,12 @@ import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -51,6 +53,14 @@ public class Letter {
     public void addGift(Gift gift) {
         gifts.add(gift);
         gift.setLetter(this);
+    }
+
+    @OneToOne(mappedBy = "letter", cascade = CascadeType.ALL, orphanRemoval = true)
+    private LetterStatus status;
+
+    public void setStatus(LetterStatus status) {
+        this.status = status;
+        status.setLetter(this);
     }
 
 }

@@ -36,7 +36,7 @@ public class ElfService {
                 elf.getUser().getId(),
                 elf.getUser().getLogin(),
                 elf.getNameElf(),
-                elf.getUser().getRole().getName()
+                elf.getUser().getRole().getName().name()
         );
     }
 

@@ -24,7 +24,7 @@ public class UserService {
             throw new IllegalArgumentException("Логин уже существует");
         }
 
-        Role role = roleRepository.findByName(roleName.name())
+        Role role = roleRepository.findByName(roleName)
                 .orElseThrow(() -> new IllegalStateException("Роль не найдена"));
 
         User user = new User();

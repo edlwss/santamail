@@ -7,6 +7,7 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import ru.itche.lettersproccesing.entity.auth.Role;
+import ru.itche.lettersproccesing.entity.auth.RoleName;
 import ru.itche.lettersproccesing.entity.auth.User;
 import ru.itche.lettersproccesing.repository.auth.RoleRepository;
 import ru.itche.lettersproccesing.repository.auth.UserRepository;
@@ -32,7 +33,7 @@ public class AdminInitializer implements ApplicationRunner {
             return;
         }
 
-        Role adminRole = roleRepository.findByName("ROLE_ADMIN")
+        Role adminRole = roleRepository.findByName(RoleName.ROLE_ADMIN)
                 .orElseThrow(() ->
                         new IllegalStateException("ROLE_ADMIN не существует")
                 );
