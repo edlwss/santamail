@@ -30,7 +30,12 @@ public class LetterController {
 
     private final LetterService letterService;
 
-    @GetMapping("/admin/letters/{status}")
+    @GetMapping("/letter/{id}")
+    public GetLetter getById(@PathVariable Long id) {
+        return letterService.getById(id);
+    }
+
+    @GetMapping("/letters/{status}")
     public ResponseEntity<List<GetLetter>> getLettersByStatus(
             @PathVariable
             @Schema(
