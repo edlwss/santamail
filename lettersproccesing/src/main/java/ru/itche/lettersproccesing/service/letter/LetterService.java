@@ -159,6 +159,32 @@ public class LetterService {
                         .toList()
         );
     }
+
+    public GetLetter getById(Long id) {
+
+        Letter letter = letterRepository.findByIdWithGifts(id)
+                .orElseThrow(() ->
+                        new IllegalArgumentException("Такого письма не существует")
+                );
+
+        return new GetLetter(
+                letter.getId(),
+                letter.getFullName().getLastName(),
+                letter.getFullName().getFirstName(),
+                letter.getFullName().getPatronymic(),
+                letter.getAge(),
+                letter.getCity(),
+                letter.getTextLetter(),
+                letter.getGifts().stream()
+                        .map(gift -> new GetGift(
+                                gift.getId(),
+                                gift.getNameGift(),
+                                gift.getPrice()
+                        ))
+                        .toList()
+        );
+    }
+
 }
 
 
