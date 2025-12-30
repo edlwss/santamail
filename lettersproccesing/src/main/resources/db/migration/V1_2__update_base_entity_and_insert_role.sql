@@ -1,32 +1,66 @@
-ALTER TABLE users
-    ADD CONSTRAINT uc_users_login UNIQUE (login);
+CREATE SEQUENCE IF NOT EXISTS role_id_seq START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE IF NOT EXISTS user_id_seq START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE IF NOT EXISTS let_id_seq START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE IF NOT EXISTS gift_id_seq START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE IF NOT EXISTS status_id_seq START WITH 1 INCREMENT BY 1;
 
-ALTER TABLE letters
-    ALTER COLUMN city TYPE VARCHAR(255) USING (city::VARCHAR(255));
+CREATE TABLE roles (
+                      id BIGINT PRIMARY KEY DEFAULT nextval('role_id_seq'),
+                      name_role VARCHAR(50) NOT NULL UNIQUE
+);
 
-ALTER TABLE letters
-    ALTER COLUMN first_name TYPE VARCHAR(255) USING (first_name::VARCHAR(255));
+CREATE TABLE users (
+                       id BIGINT PRIMARY KEY DEFAULT nextval('user_id_seq'),
+                       login VARCHAR(50) NOT NULL,
+                       password VARCHAR(255) NOT NULL,
+                       role_id BIGINT NOT NULL,
+                       CONSTRAINT fk_users_role FOREIGN KEY (role_id) REFERENCES roles(id)
+);
 
-ALTER TABLE letters
-    ALTER COLUMN last_name TYPE VARCHAR(255) USING (last_name::VARCHAR(255));
+CREATE TABLE letters (
+                         id BIGINT PRIMARY KEY DEFAULT nextval('let_id_seq'),
+                         age INTEGER NOT NULL,
+                         city VARCHAR(100) NOT NULL,
+                         text_letter TEXT NOT NULL,
+                         last_name VARCHAR(100) NOT NULL,
+                         first_name VARCHAR(100) NOT NULL,
+                         patronymic VARCHAR(100)
+);
 
-ALTER TABLE users
-    ALTER COLUMN login TYPE VARCHAR(255) USING (login::VARCHAR(255));
+CREATE TABLE gifts (
+                       id BIGINT PRIMARY KEY DEFAULT nextval('gift_id_seq'),
+                       name_gift VARCHAR(255) NOT NULL,
+                       price DOUBLE PRECISION NOT NULL,
+                       letter_id BIGINT NOT NULL,
+                       CONSTRAINT fk_gifts_letter
+                           FOREIGN KEY (letter_id) REFERENCES letters(id) ON DELETE CASCADE
+);
 
-ALTER TABLE elfs
-    ALTER COLUMN name_elf TYPE VARCHAR(255) USING (name_elf::VARCHAR(255));
+CREATE TABLE letters_status (
+                                id BIGINT PRIMARY KEY DEFAULT nextval('status_id_seq'),
+                                status_letter VARCHAR(30) NOT NULL,
+                                letter_id BIGINT NOT NULL,
+                                CONSTRAINT fk_status_letter
+                                    FOREIGN KEY (letter_id) REFERENCES letters(id) ON DELETE CASCADE,
+                                CONSTRAINT status_letter_check
+                                    CHECK (status_letter IN ('получено', 'в обработке', 'исполнено', 'отклонено'))
+);
 
-ALTER TABLE role
-    ALTER COLUMN name_role TYPE VARCHAR(255) USING (name_role::VARCHAR(255));
+CREATE TABLE elfs (
+                      user_id BIGINT PRIMARY KEY,
+                      name_elf VARCHAR(100) NOT NULL,
+                      CONSTRAINT fk_elf_user
+                          FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
 
-ALTER TABLE users
-    ALTER COLUMN password TYPE VARCHAR(255) USING (password::VARCHAR(255));
+INSERT INTO roles (name_role)
+SELECT 'ROLE_ADMIN'
+    WHERE NOT EXISTS (
+    SELECT 1 FROM roles WHERE name_role = 'ROLE_ADMIN'
+);
 
-ALTER TABLE letters
-    ALTER COLUMN patronymic TYPE VARCHAR(255) USING (patronymic::VARCHAR(255));
-
-ALTER TABLE letters_status
-    ALTER COLUMN status_letter TYPE VARCHAR(255) USING (status_letter::VARCHAR(255));
-
-ALTER TABLE letters
-    ALTER COLUMN text_letter TYPE VARCHAR(255) USING (text_letter::VARCHAR(255));
+INSERT INTO roles (name_role)
+SELECT 'ROLE_ELF'
+    WHERE NOT EXISTS (
+    SELECT 1 FROM roles WHERE name_role = 'ROLE_ELF'
+);

@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "role")
+@Table(name = "roles")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -17,6 +17,7 @@ public class Role {
     @SequenceGenerator(name = "role_seq", sequenceName = "role_id_seq", allocationSize = 1)
     private Long id;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "name_role", nullable = false, unique = true)
-    private String name;
+    private RoleName name;
 }

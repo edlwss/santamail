@@ -1,45 +1,38 @@
-package ru.itche.lettersproccesing.service.auth;
+package ru.itche.lettersproccesing.service.user;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import ru.itche.lettersproccesing.dto.user.CreateElfRequest;
-import ru.itche.lettersproccesing.dto.user.CreateUserResponse;
+
 import ru.itche.lettersproccesing.entity.auth.Role;
+import ru.itche.lettersproccesing.entity.auth.RoleName;
 import ru.itche.lettersproccesing.entity.auth.User;
 import ru.itche.lettersproccesing.repository.auth.RoleRepository;
 import ru.itche.lettersproccesing.repository.auth.UserRepository;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class UserService {
 
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public CreateUserResponse createUser(CreateElfRequest request) {
+    public User createUser(String login, String rawPassword, RoleName roleName) {
 
-        if (userRepository.existsByLogin(request.login())) {
-            throw new IllegalArgumentException("Пользователь с таким логином уже существует");
+        if (userRepository.existsByLogin(login)) {
+            throw new IllegalArgumentException("Логин уже существует");
         }
 
-        Role role = roleRepository.findByName(request.role())
-                .orElseThrow(() ->
-                        new IllegalArgumentException("Роли нет: " + request.role())
-                );
+        Role role = roleRepository.findByName(roleName)
+                .orElseThrow(() -> new IllegalStateException("Роль не найдена"));
 
         User user = new User();
-        user.setLogin(request.login());
-        user.setPassword(passwordEncoder.encode(request.password()));
+        user.setLogin(login);
+        user.setPassword(passwordEncoder.encode(rawPassword));
         user.setRole(role);
 
-        User saved = userRepository.save(user);
-
-        return new CreateUserResponse(
-                saved.getId(),
-                saved.getLogin(),
-                saved.getRole().getName()
-        );
+        return userRepository.save(user);
     }
 }
+
