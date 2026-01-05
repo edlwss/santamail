@@ -17,6 +17,7 @@ import ru.itche.lettersproccesing.entity.EnumLetterStatus;
 import ru.itche.lettersproccesing.entity.Gift;
 import ru.itche.lettersproccesing.entity.Letter;
 import ru.itche.lettersproccesing.entity.LetterStatus;
+import ru.itche.lettersproccesing.exception.LetterNotFoundException;
 import ru.itche.lettersproccesing.kafka.GiftApprovalProducer;
 import ru.itche.lettersproccesing.repository.elf.ElfRepository;
 import ru.itche.lettersproccesing.repository.letter.LetterRepository;
@@ -163,9 +164,7 @@ public class LetterService {
     public GetLetter getById(Long id) {
 
         Letter letter = letterRepository.findByIdWithGifts(id)
-                .orElseThrow(() ->
-                        new IllegalArgumentException("Такого письма не существует")
-                );
+                .orElseThrow(() -> new LetterNotFoundException(id));
 
         return new GetLetter(
                 letter.getId(),

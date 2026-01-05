@@ -3,6 +3,7 @@ package ru.itche.giftmanagement.service.order;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 import ru.itche.giftmanagement.config.LetterClient;
 import ru.itche.giftmanagement.dto.order.complete.CompleteAssemblyOrderRequest;
 import ru.itche.giftmanagement.dto.order.complete.CompleteAssemblyOrderResponse;
@@ -15,6 +16,7 @@ import ru.itche.giftmanagement.entity.AssemblyOrder;
 import ru.itche.giftmanagement.entity.AssemblyOrderItem;
 import ru.itche.giftmanagement.entity.AssemblyOrderStatus;
 import ru.itche.giftmanagement.entity.GiftCatalog;
+import ru.itche.giftmanagement.exception.LetterUnavailableException;
 import ru.itche.giftmanagement.repository.AssemblyOrderRepository;
 import ru.itche.giftmanagement.repository.GiftCatalogRepository;
 
@@ -33,9 +35,11 @@ public class AssemblyOrderService {
     @Transactional
     public AssemblyOrderResponse createOrderFromLetter(Long letterId) {
 
-        GetLetter letter = letterClient.getLetterById(letterId);
-        if (letter == null) {
-            throw new IllegalArgumentException("Письмо с id " + letterId + " не найдено");
+        GetLetter letter;
+        try {
+            letter = letterClient.getLetterById(letterId);
+        } catch (WebClientResponseException.NotFound e) {
+            throw new LetterUnavailableException(letterId);
         }
 
         List<String> requestedNames = letter.gifts().stream()
