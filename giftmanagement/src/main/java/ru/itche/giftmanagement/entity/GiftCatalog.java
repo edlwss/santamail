@@ -26,7 +26,7 @@ public class GiftCatalog {
     @SequenceGenerator(name = "catalog_generator", sequenceName = "catalog_id_seq", allocationSize = 1)
     private Long id;
 
-    @Column(name = "name", nullable = false)
+    @Column(name = "name_gift", nullable = false)
     private String name;
 
     @Column(name = "category", nullable = false)
