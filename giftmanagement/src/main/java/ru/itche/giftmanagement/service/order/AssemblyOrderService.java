@@ -3,8 +3,9 @@ package ru.itche.giftmanagement.service.order;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
-import ru.itche.giftmanagement.config.LetterClient;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestClientException;
+import ru.itche.giftmanagement.client.LetterClient;
 import ru.itche.giftmanagement.dto.order.complete.CompleteAssemblyOrderRequest;
 import ru.itche.giftmanagement.dto.order.complete.CompleteAssemblyOrderResponse;
 import ru.itche.giftmanagement.dto.order.create.AssemblyOrderResponse;
@@ -38,7 +39,7 @@ public class AssemblyOrderService {
         GetLetter letter;
         try {
             letter = letterClient.getLetterById(letterId);
-        } catch (WebClientResponseException.NotFound e) {
+        } catch (RestClientException e) {
             throw new LetterUnavailableException(letterId);
         }
 
