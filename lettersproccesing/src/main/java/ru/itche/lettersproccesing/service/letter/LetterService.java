@@ -17,6 +17,7 @@ import ru.itche.lettersproccesing.entity.EnumLetterStatus;
 import ru.itche.lettersproccesing.entity.Gift;
 import ru.itche.lettersproccesing.entity.Letter;
 import ru.itche.lettersproccesing.entity.LetterStatus;
+import ru.itche.lettersproccesing.exception.LetterNotFoundException;
 import ru.itche.lettersproccesing.kafka.GiftApprovalProducer;
 import ru.itche.lettersproccesing.repository.elf.ElfRepository;
 import ru.itche.lettersproccesing.repository.letter.LetterRepository;
@@ -159,6 +160,30 @@ public class LetterService {
                         .toList()
         );
     }
+
+    public GetLetter getById(Long id) {
+
+        Letter letter = letterRepository.findByIdWithGifts(id)
+                .orElseThrow(() -> new LetterNotFoundException(id));
+
+        return new GetLetter(
+                letter.getId(),
+                letter.getFullName().getLastName(),
+                letter.getFullName().getFirstName(),
+                letter.getFullName().getPatronymic(),
+                letter.getAge(),
+                letter.getCity(),
+                letter.getTextLetter(),
+                letter.getGifts().stream()
+                        .map(gift -> new GetGift(
+                                gift.getId(),
+                                gift.getNameGift(),
+                                gift.getPrice()
+                        ))
+                        .toList()
+        );
+    }
+
 }
 
 
