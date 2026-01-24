@@ -3,13 +3,18 @@ package ru.itche.lettersproccesing.service.letter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import ru.itche.lettersproccesing.dto.gift.GetGift;
+import ru.itche.lettersproccesing.dto.kafka.AddElfForLetterEvent;
+import ru.itche.lettersproccesing.dto.kafka.CreateLetterEvent;
 import ru.itche.lettersproccesing.dto.kafka.GiftApprovalEvent;
 import ru.itche.lettersproccesing.dto.letter.AddElfForLetterRequest;
 import ru.itche.lettersproccesing.dto.letter.AddElfForLetterResponse;
 import ru.itche.lettersproccesing.dto.letter.CreateLetterRequest;
 import ru.itche.lettersproccesing.dto.letter.CreateLetterResponse;
 import ru.itche.lettersproccesing.dto.letter.GetLetter;
+import ru.itche.lettersproccesing.dto.letter.GetLetterFilterRequest;
 import ru.itche.lettersproccesing.dto.letter.UpdateLetterRequest;
 import ru.itche.lettersproccesing.dto.letter.UpdateLetterResponse;
 import ru.itche.lettersproccesing.entity.Elf;
@@ -18,12 +23,13 @@ import ru.itche.lettersproccesing.entity.Gift;
 import ru.itche.lettersproccesing.entity.Letter;
 import ru.itche.lettersproccesing.entity.LetterStatus;
 import ru.itche.lettersproccesing.exception.LetterNotFoundException;
-import ru.itche.lettersproccesing.kafka.GiftApprovalProducer;
+import ru.itche.lettersproccesing.kafka.LetterEventProducer;
 import ru.itche.lettersproccesing.repository.elf.ElfRepository;
 import ru.itche.lettersproccesing.repository.letter.LetterRepository;
 import ru.itche.lettersproccesing.entity.valueobject.FullName;
 import ru.itche.lettersproccesing.repository.letter.LetterStatusRepository;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -32,8 +38,9 @@ public class LetterService {
 
     private final LetterRepository letterRepository;
     private final LetterStatusRepository letterStatusRepository;
-    private final GiftApprovalProducer giftApprovalProducer;
+    private final LetterEventProducer letterEventProducer;
     private final ElfRepository elfRepository;
+
 
     @Transactional
     public CreateLetterResponse create(CreateLetterRequest request) {
@@ -57,38 +64,65 @@ public class LetterService {
                 letter.addGift(gift);
             });
         }
+
         Letter savedLetter = letterRepository.save(letter);
 
+        ExpensiveCheckResult check = checkExpensiveGifts(savedLetter.getGifts());
+
+        CreateLetterEvent createEvent = null;
+        List<GiftApprovalEvent> expensiveEvents = new ArrayList<>();
         LetterStatus status = new LetterStatus();
         status.setLetter(savedLetter);
         status.setElf(null);
-        status.setStatus(
-                checkPriceGiftsLetter(savedLetter.getGifts())
-                        ? EnumLetterStatus.WAITING_APPROVAL
-                        : EnumLetterStatus.RECEIVED
-        );
+
+        if (!check.hasExpensive()) {
+            status.setStatus(EnumLetterStatus.RECEIVED);
+            createEvent = new CreateLetterEvent(savedLetter.getId());
+
+        } else {
+            status.setStatus(EnumLetterStatus.WAITING_APPROVAL);
+
+            for (Gift gift : check.expensiveGifts()) {
+                expensiveEvents.add(new GiftApprovalEvent(
+                        gift.getId(),
+                        gift.getNameGift(),
+                        gift.getPrice()
+                ));
+            }
+        }
 
         letterStatusRepository.save(status);
+
+        registerAfterCommit(createEvent, expensiveEvents);
 
         return mapToResponse(savedLetter, status);
     }
 
-    private boolean checkPriceGiftsLetter(List<Gift> gifts) {
-        boolean hasExpensiveGift = false;
+    private record ExpensiveCheckResult(boolean hasExpensive, List<Gift> expensiveGifts) {}
 
+    private ExpensiveCheckResult checkExpensiveGifts(List<Gift> gifts) {
+
+        List<Gift> expensive = new ArrayList<>();
         for (Gift gift : gifts) {
             if (gift.getPrice() > 5000) {
-                hasExpensiveGift = true;
-
-                GiftApprovalEvent event = new GiftApprovalEvent(
-                        gift.getId(),
-                        gift.getNameGift(),
-                        gift.getPrice()
-                );
-                giftApprovalProducer.sendExpensiveGiftEvent(event);
+                expensive.add(gift);
             }
         }
-        return hasExpensiveGift;
+        return new ExpensiveCheckResult(!expensive.isEmpty(), expensive);
+    }
+
+    private void registerAfterCommit(CreateLetterEvent createEvent, List<GiftApprovalEvent> expensiveEvents) {
+
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCommit() {
+                if (createEvent != null) {
+                    letterEventProducer.sendCreateLetterEvent(createEvent);
+                } else {
+                    expensiveEvents.forEach(letterEventProducer::sendExpensiveGiftEvent);
+                }
+            }
+        });
     }
 
     private CreateLetterResponse mapToResponse(Letter letter, LetterStatus status) {
@@ -117,16 +151,19 @@ public class LetterService {
     }
 
     @Transactional
-    public AddElfForLetterResponse addElfForLetter(Long id, AddElfForLetterRequest request) {
+    public AddElfForLetterResponse addElfForLetter(Long letterId, AddElfForLetterRequest request) {
 
-        LetterStatus letterStatus = letterStatusRepository.findByLetterId(id)
-                .orElseThrow(() -> new RuntimeException("Письмо с id " + id + " не найдено"));
+        LetterStatus letterStatus = letterStatusRepository.findByLetterId(letterId)
+                .orElseThrow(() -> new RuntimeException("Письмо с id " + letterId + " не найдено"));
 
         Elf elf = elfRepository.findById(request.idElf())
-                .orElseThrow(() -> new RuntimeException("Эльф с id " + id + "не найден"));
+                .orElseThrow(() -> new RuntimeException("Эльф с id " + request.idElf() + "не найден"));
 
         letterStatus.setElf(elf);
         letterStatusRepository.save(letterStatus);
+
+        AddElfForLetterEvent addElfForLetterEvent = new AddElfForLetterEvent(letterId);
+        letterEventProducer.sendAddElfForLetterEvent(addElfForLetterEvent);
 
         return new AddElfForLetterResponse(
                 letterStatus.getLetter().getId(),
@@ -134,9 +171,17 @@ public class LetterService {
         );
     }
 
-    @Transactional
-    public List<GetLetter> getLettersByStatus(EnumLetterStatus status) {
-        return letterStatusRepository.findAllByStatus(status).stream()
+    @Transactional(readOnly = true)
+    public List<GetLetter> getLetters(GetLetterFilterRequest filter) {
+
+        String city = (filter != null && filter.city() != null && !filter.city().isBlank())
+                ? filter.city().trim()
+                : null;
+
+        EnumLetterStatus status = (filter != null) ? filter.status() : null;
+        String statusDb = (status != null) ? status.name() : null;
+
+        return letterStatusRepository.findAllByStatusAndCity(statusDb, city).stream()
                 .map(LetterStatus::getLetter)
                 .map(this::mapToDto)
                 .toList();

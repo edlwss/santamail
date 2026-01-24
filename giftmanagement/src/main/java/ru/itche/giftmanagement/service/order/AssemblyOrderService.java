@@ -3,10 +3,8 @@ package ru.itche.giftmanagement.service.order;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 import ru.itche.giftmanagement.client.LetterClient;
-import ru.itche.giftmanagement.dto.order.complete.CompleteAssemblyOrderRequest;
 import ru.itche.giftmanagement.dto.order.complete.CompleteAssemblyOrderResponse;
 import ru.itche.giftmanagement.dto.order.create.AssemblyOrderResponse;
 import ru.itche.giftmanagement.dto.letter.GetLetter;
@@ -90,9 +88,9 @@ public class AssemblyOrderService {
     }
 
     @Transactional
-    public CompleteAssemblyOrderResponse completeOrder(CompleteAssemblyOrderRequest request) {
+    public CompleteAssemblyOrderResponse completeOrder(Long letterId) {
 
-        AssemblyOrder order = assemblyOrderRepository.findById(request.orderId())
+        AssemblyOrder order = assemblyOrderRepository.findByLetterId(letterId)
                 .orElseThrow(() -> new IllegalStateException("Заказа не существует"));
 
         for (AssemblyOrderItem item : order.getItems()) {

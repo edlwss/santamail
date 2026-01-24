@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 @Getter
 @Setter
 @Component
-@ConfigurationProperties(prefix = "letter.service.url")
+@ConfigurationProperties(prefix = "letter.service")
 public class LetterServiceProperties {
     private String url;
 }
