@@ -6,14 +6,18 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 import ru.itche.giftmanagement.dto.kafka.AddElfForLetterEvent;
 import ru.itche.giftmanagement.dto.kafka.CreateLetterEvent;
+import ru.itche.giftmanagement.dto.kafka.GiftNotFoundEvent;
+import ru.itche.giftmanagement.exception.GiftNotFoundException;
+import ru.itche.giftmanagement.exception.GiftOutOfStockException;
 import ru.itche.giftmanagement.service.order.AssemblyOrderService;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class LetterCreateListener {
+public class LetterListener {
 
     private final AssemblyOrderService assemblyOrderService;
+    private final GiftEventProducer giftEventProducer;
 
     @KafkaListener(
             topics = "letter-create",
@@ -22,7 +26,12 @@ public class LetterCreateListener {
     )
     public void handleLetterCreated(CreateLetterEvent event) {
         log.info("Получено событие CreateLetterEvent, letterId={}", event.letterId());
-        assemblyOrderService.createOrderFromLetter(event.letterId());
+        try {
+            assemblyOrderService.createOrderFromLetter(event.letterId());
+        } catch (GiftNotFoundException | GiftOutOfStockException ex) {
+            log.warn("Не удалось создать заказ для letterId={}: {}", event.letterId(), ex.getMessage());
+            giftEventProducer.sendGiftNotFoundEvent(new GiftNotFoundEvent(event.letterId()));
+        }
     }
 
     @KafkaListener(
