@@ -9,14 +9,22 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
-@Table(name = "assembly_order_item")
+@Table(name = "assembly_order_items")
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class AssemblyOrderItem {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "item_generator")
-    @SequenceGenerator(name = "item_generator", sequenceName = "item_id_seq", allocationSize = 1)
+    @SequenceGenerator(name = "item_generator", sequenceName = "assembly_order_item_id_seq", allocationSize = 1)
     private Long id;
 
     @ManyToOne()

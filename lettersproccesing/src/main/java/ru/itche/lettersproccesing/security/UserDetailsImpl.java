@@ -1,6 +1,7 @@
 package ru.itche.lettersproccesing.security;
 
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import ru.itche.lettersproccesing.entity.auth.User;
 import org.springframework.security.core.*;
@@ -8,6 +9,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.List;
+
 
 @AllArgsConstructor
 public class UserDetailsImpl implements UserDetails {

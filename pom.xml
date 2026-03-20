@@ -6,7 +6,6 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <!-- ROOT / AGGREGATOR -->
     <groupId>ru.itche</groupId>
     <artifactId>santamail</artifactId>
     <version>0.0.1-SNAPSHOT</version>
@@ -15,11 +14,10 @@
     <name>santamail</name>
     <description>SantaMail multi-module system</description>
 
-    <!-- SPRING BOOT PARENT (единый для всех модулей) -->
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.5.3</version>
+        <version>3.5.5</version>
         <relativePath/>
     </parent>
 

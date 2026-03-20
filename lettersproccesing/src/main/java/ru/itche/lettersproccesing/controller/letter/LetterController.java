@@ -11,12 +11,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ru.itche.lettersproccesing.dto.letter.AddElfForLetterRequest;
 import ru.itche.lettersproccesing.dto.letter.AddElfForLetterResponse;
 import ru.itche.lettersproccesing.dto.letter.CreateLetterRequest;
 import ru.itche.lettersproccesing.dto.letter.CreateLetterResponse;
 import ru.itche.lettersproccesing.dto.letter.GetLetter;
+import ru.itche.lettersproccesing.dto.letter.GetLetterFilterRequest;
 import ru.itche.lettersproccesing.dto.letter.UpdateLetterRequest;
 import ru.itche.lettersproccesing.dto.letter.UpdateLetterResponse;
 import ru.itche.lettersproccesing.entity.EnumLetterStatus;
@@ -30,17 +32,17 @@ public class LetterController {
 
     private final LetterService letterService;
 
-    @GetMapping("/admin/letters/{status}")
-    public ResponseEntity<List<GetLetter>> getLettersByStatus(
-            @PathVariable
-            @Schema(
-                    description = "Статус письма",
-                    example = "WAITING_APPROVAL",
-                    implementation = EnumLetterStatus.class
-            )
-            EnumLetterStatus status
+    @GetMapping("/letter/{id}")
+    public GetLetter getById(@PathVariable Long id) {
+        return letterService.getById(id);
+    }
+
+    @GetMapping("/letter/filter")
+    public List<GetLetter> getLetters(
+            @RequestParam(required = false) String city,
+            @RequestParam(required = false) EnumLetterStatus status
     ) {
-        return ResponseEntity.ok(letterService.getLettersByStatus(status));
+        return letterService.getLetters(new GetLetterFilterRequest(city, status));
     }
 
 

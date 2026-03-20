@@ -8,7 +8,6 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
@@ -25,12 +24,12 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "assembly_order")
+@Table(name = "assembly_orders")
 public class AssemblyOrder {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "order_generator")
-    @SequenceGenerator(name = "order_generator", sequenceName = "order_id_seq", allocationSize = 1)
+    @SequenceGenerator(name = "order_generator", sequenceName = "assembly_order_id_seq", allocationSize = 1)
     private Long id;
 
     @Column(name = "letter_id", nullable = false)
